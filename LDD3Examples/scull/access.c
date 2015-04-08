@@ -95,7 +95,7 @@ struct file_operations scull_sngl_fops = {
 
 static struct scull_dev scull_u_device;
 static int scull_u_count;	/* initialized to 0 by default */
-static uid_t scull_u_owner;	/* initialized to 0 by default */
+static kuid_t scull_u_owner;	/* initialized to 0 by default */
 
 // Deprecated use of SPIN_LOCK
 #ifndef SPIN_LOCK_UNLOCKED
@@ -110,8 +110,8 @@ static int scull_u_open(struct inode *inode, struct file *filp)
 
 	spin_lock(&scull_u_lock);
 	if (scull_u_count && 
-			(scull_u_owner != current->cred->uid) &&  /* allow user */
-			(scull_u_owner != current->cred->euid) && /* allow whoever did su */
+			(scull_u_owner.val != current->cred->uid.val) &&  /* allow user */
+			(scull_u_owner.val != current->cred->euid.val) && /* allow whoever did su */
 			!capable(CAP_DAC_OVERRIDE)) { /* still allow root */
 		spin_unlock(&scull_u_lock);
 		return -EBUSY;   /* -EPERM would confuse the user */
@@ -162,7 +162,7 @@ struct file_operations scull_user_fops = {
 
 static struct scull_dev scull_w_device;
 static int scull_w_count;	/* initialized to 0 by default */
-static uid_t scull_w_owner;	/* initialized to 0 by default */
+static kuid_t scull_w_owner;	/* initialized to 0 by default */
 static DECLARE_WAIT_QUEUE_HEAD(scull_w_wait);
 
 // Deprecated use of SPIN_LOCK
@@ -175,8 +175,8 @@ static spinlock_t scull_w_lock = SPIN_LOCK_UNLOCKED;
 static inline int scull_w_available(void)
 {
 	return scull_w_count == 0 ||
-		scull_w_owner == current->cred->uid ||
-		scull_w_owner == current->cred->euid ||
+		scull_w_owner.val == current->cred->uid.val ||
+		scull_w_owner.val == current->cred->euid.val ||
 		capable(CAP_DAC_OVERRIDE);
 }
 
