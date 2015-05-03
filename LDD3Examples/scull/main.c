@@ -295,7 +295,7 @@ loff_t scull_llseek(struct file *filp, loff_t off, int whence)
 /*
  * The ioctl() implementation
  */
-long scull_ioctl(struct inode *inode, struct file *filp,
+static long scull_ioctl(struct inode *inode, struct file *filp,
                  unsigned int cmd, unsigned long arg)
 {
 
